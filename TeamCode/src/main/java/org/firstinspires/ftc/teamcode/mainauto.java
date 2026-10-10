@@ -143,7 +143,7 @@ public class mainauto extends OpMode
         double drive = 0;
         double turn  =  0;
         double sideways = 0;
-        if (runtime.seconds() < 1){
+        if (runtime.seconds() < 0.3){
             drive = -0.5;
         } else {
             drive = 0;

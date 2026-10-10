@@ -45,6 +45,8 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.Gamepad;
+
 /*
  * This file contains an example of an iterative (Non-Linear) "OpMode".
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
@@ -75,7 +77,14 @@ public class maindrive extends OpMode
     private CRServo flapservo = null;
     private DcMotorEx flywheel = null;
     private NormalizedColorSensor colorSensor;
-    public double flywheelspeed = 1500;
+    public double flywheelspeed = 1350;
+    private Gamepad previousGamepad1 = new Gamepad();
+    private Gamepad currentGamepad1 = new Gamepad();
+    private boolean shootertoggle = false;
+    private boolean slowmodetoggle = false;
+
+    
+    
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -130,6 +139,10 @@ public class maindrive extends OpMode
      */
     @Override
     public void loop() {
+        
+        previousGamepad1.copy(currentGamepad1);
+        currentGamepad1.copy(gamepad1);
+        
         // Setup a variable for each drive wheel to save power level for telemetry
 
 
@@ -138,9 +151,19 @@ public class maindrive extends OpMode
 
         // POV Mode uses left stick to go forward, and right stick to turn.
         // - This uses basic math to combine motions and is easier to drive straight.
-        double drive = gamepad1.left_stick_y;
-        double turn  =  gamepad1.right_stick_x;
-        double sideways = gamepad1.left_stick_x;
+        double drive = 0.0;
+        double turn  =  0.0;
+        double sideways = 0.0;
+        if (!slowmodetoggle){
+        drive = gamepad1.left_stick_y;
+        turn  =  gamepad1.right_stick_x;
+        sideways = gamepad1.left_stick_x;
+        } else {
+        drive = gamepad1.left_stick_y * 0.2;
+        turn  =  gamepad1.right_stick_x * 0.2;
+        sideways = gamepad1.left_stick_x * 0.2;
+
+        }
         double devisor = Math.max(Math.abs(drive) + Math.abs(turn) + Math.abs(sideways), 1);
         fl.setPower((drive + -turn + -sideways) / devisor);
         fr.setPower((-drive + -turn + -sideways) / devisor);
@@ -179,15 +202,34 @@ public class maindrive extends OpMode
        
        
        
-        if (gamepad1.a){
-            flywheel.setVelocity(flywheelspeed);
-           
-           
-        } else {
-            flywheel.setVelocity(0.0);
-           
-        }
+        if (currentGamepad1.a && !previousGamepad1.a){
+            if (shootertoggle == false){
+                shootertoggle = true;
+                flywheel.setVelocity(flywheelspeed);
 
+            } else {
+                shootertoggle = false;
+                flywheel.setVelocity(0);
+
+            }
+            
+           
+           
+        } 
+        if (currentGamepad1.x && !previousGamepad1.x){
+            if (slowmodetoggle == false){
+                slowmodetoggle = true;
+                
+
+            } else {
+                slowmodetoggle = false;
+                
+
+            }
+            
+           
+           
+        } 
 
 
                
@@ -198,7 +240,12 @@ public class maindrive extends OpMode
 
         // Send calculated power to wheels
 
-
+        if (currentGamepad1.dpad_up && !previousGamepad1.dpad_up){
+            flywheelspeed += 5.0;
+        }
+        if (currentGamepad1.dpad_down && !previousGamepad1.dpad_down){
+            flywheelspeed -= 5.0;
+        }
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
@@ -207,6 +254,7 @@ public class maindrive extends OpMode
         telemetry.addData("Blue", colors.blue);
         telemetry.addData("Alpha (Proximity/Light)", colors.alpha);
         telemetry.addData("Current Velocity", flywheel.getVelocity());
+        telemetry.addData("target velocity", flywheelspeed);
         telemetry.update();
 
     }
