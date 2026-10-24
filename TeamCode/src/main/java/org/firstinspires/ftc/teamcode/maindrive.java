@@ -28,8 +28,10 @@
  */
 
 package org.firstinspires.ftc.teamcode;
+import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -63,8 +65,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 @TeleOp(name="main drive", group="Iterative OpMode")
 
-public class maindrive extends OpMode
-{
+public class maindrive extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor fl = null;
@@ -74,8 +75,11 @@ public class maindrive extends OpMode
     private DcMotor intake = null;
     private CRServo intakeservo = null;
     private CRServo intakeservo2 = null;
+    private RevBlinkinLedDriver leds = null;
+
     private CRServo flapservo = null;
     private DcMotorEx flywheel = null;
+    private DcMotorEx encoder = null;
     private NormalizedColorSensor colorSensor;
     public double flywheelspeed = 1350;
     private Gamepad previousGamepad1 = new Gamepad();
@@ -93,6 +97,8 @@ public class maindrive extends OpMode
         telemetry.addData("Status", "Initialized");
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "color");
 
+        leds = hardwareMap.get(RevBlinkinLedDriver.class, "led");
+
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -100,6 +106,17 @@ public class maindrive extends OpMode
         fr = hardwareMap.get(DcMotor.class, "fr");
         bl  = hardwareMap.get(DcMotor.class, "bl");
         br = hardwareMap.get(DcMotor.class, "br");
+        encoder = hardwareMap.get(DcMotorEx.class, "es");     
+        
+        
+
+        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+
+
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheel.setVelocityPIDFCoefficients(250, 3, 20, 0);
@@ -146,6 +163,7 @@ public class maindrive extends OpMode
         // Setup a variable for each drive wheel to save power level for telemetry
 
 
+
         // Choose to drive using either Tank Mode, or POV Mode
         // Comment out the method that's not used.  The default below is POV.
 
@@ -154,7 +172,7 @@ public class maindrive extends OpMode
         double drive = 0.0;
         double turn  =  0.0;
         double sideways = 0.0;
-        if (!slowmodetoggle){
+        if (!slowmodetoggle) {
         drive = gamepad1.left_stick_y;
         turn  =  gamepad1.right_stick_x;
         sideways = gamepad1.left_stick_x;
@@ -164,6 +182,7 @@ public class maindrive extends OpMode
         sideways = gamepad1.left_stick_x * 0.2;
 
         }
+
         double devisor = Math.max(Math.abs(drive) + Math.abs(turn) + Math.abs(sideways), 1);
         fl.setPower((drive + -turn + -sideways) / devisor);
         fr.setPower((-drive + -turn + -sideways) / devisor);
@@ -232,13 +251,31 @@ public class maindrive extends OpMode
         } 
 
 
-               
-        // Tank Mode uses one stick to control each wheel.
-        // - This requires no math, but it is hard to drive forward slowly and keep straight.
-        // leftPower  = -gamepad1.left_stick_y ;
-        // rightPower = -gamepad1.right_stick_y ;
 
-        // Send calculated power to wheels
+
+        if (Math.abs(flywheel.getVelocity() - flywheelspeed) > 20){
+
+            if (shootertoggle == true){
+               leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+            } else {
+                leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+            }
+
+        } else {
+            leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+
+        }
+
+        if (gamepad1.b){
+            flywheel.setVelocity(-flywheelspeed);
+            flapservo.setPower(1);
+            intake.setPower(1);
+            intakeservo.setPower(1.0);
+            intakeservo2.setPower(1);
+
+        }
+
+
 
         if (currentGamepad1.dpad_up && !previousGamepad1.dpad_up){
             flywheelspeed += 5.0;
@@ -246,6 +283,7 @@ public class maindrive extends OpMode
         if (currentGamepad1.dpad_down && !previousGamepad1.dpad_down){
             flywheelspeed -= 5.0;
         }
+
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
@@ -255,6 +293,8 @@ public class maindrive extends OpMode
         telemetry.addData("Alpha (Proximity/Light)", colors.alpha);
         telemetry.addData("Current Velocity", flywheel.getVelocity());
         telemetry.addData("target velocity", flywheelspeed);
+        telemetry.addData("encocer pos: ", encoder.getCurrentPosition());
+        telemetry.addData("fl pos: ", fl.getCurrentPosition());
         telemetry.update();
 
     }
