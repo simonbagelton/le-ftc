@@ -80,11 +80,12 @@ public class maindrive extends OpMode {
     private CRServo flapservo = null;
     private DcMotorEx flywheel = null;
     private DcMotorEx encoder = null;
+    private DcMotorEx encoderf = null;
     private NormalizedColorSensor colorSensor;
     public double flywheelspeed = 1350;
     private Gamepad previousGamepad1 = new Gamepad();
     private Gamepad currentGamepad1 = new Gamepad();
-    private boolean shootertoggle = false;
+    private boolean shootertoggle = true;
     private boolean slowmodetoggle = false;
 
     
@@ -106,7 +107,16 @@ public class maindrive extends OpMode {
         fr = hardwareMap.get(DcMotor.class, "fr");
         bl  = hardwareMap.get(DcMotor.class, "bl");
         br = hardwareMap.get(DcMotor.class, "br");
+
+
+
+
+        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         encoder = hardwareMap.get(DcMotorEx.class, "es");     
+        encoderf = hardwareMap.get(DcMotorEx.class, "ef");  
         
         
 
@@ -114,7 +124,9 @@ public class maindrive extends OpMode {
 
         encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        encoderf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        encoderf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
@@ -206,9 +218,11 @@ public class maindrive extends OpMode {
        
        
         if (gamepad1.right_trigger > 0.5){
-
+            if (shootertoggle == true){
             flapservo.setPower(-1);
-           
+           } else {
+            flapservo.setPower(0);
+           }
            
         } else {
 
@@ -219,7 +233,9 @@ public class maindrive extends OpMode {
        
        
        
-       
+       if (shootertoggle == true){
+        flywheel.setVelocity(flywheelspeed);
+       }
        
         if (currentGamepad1.a && !previousGamepad1.a){
             if (shootertoggle == false){
@@ -253,27 +269,31 @@ public class maindrive extends OpMode {
 
 
 
-        if (Math.abs(flywheel.getVelocity() - flywheelspeed) > 20){
+        if (Math.abs(flywheel.getVelocity() - flywheelspeed) > 40){
 
             if (shootertoggle == true){
-               leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+               leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED); // check the exact name via autocomplete
             } else {
-                leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+                leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED); // check the exact name via autocomplete
             }
 
         } else {
-            leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+            leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
 
         }
 
         if (gamepad1.b){
             flywheel.setVelocity(-flywheelspeed);
-            flapservo.setPower(1);
-            intake.setPower(1);
+
+            intake.setPower(-1);
             intakeservo.setPower(1.0);
             intakeservo2.setPower(1);
 
+        } else if (shootertoggle == false){
+            flywheel.setVelocity(0);
         }
+            
+        
 
 
 
@@ -294,7 +314,7 @@ public class maindrive extends OpMode {
         telemetry.addData("Current Velocity", flywheel.getVelocity());
         telemetry.addData("target velocity", flywheelspeed);
         telemetry.addData("encocer pos: ", encoder.getCurrentPosition());
-        telemetry.addData("fl pos: ", fl.getCurrentPosition());
+        telemetry.addData("encoderf pos: ", encoderf.getCurrentPosition());
         telemetry.update();
 
     }
