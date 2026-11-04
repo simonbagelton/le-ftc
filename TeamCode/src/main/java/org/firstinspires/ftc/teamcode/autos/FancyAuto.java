@@ -22,7 +22,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @Autonomous(name = "fancy pantaloons", group = "Autonomous")
-public class FAncyAuto extends LinearOpMode {
+public class FancyAuto extends LinearOpMode {
 
     private Follower follower;
 
@@ -50,14 +50,28 @@ public class FAncyAuto extends LinearOpMode {
         );
     }
 
+private Command slamWall() {
+    return sequential(
+        instant(() -> follower.manual(0.3, 0, 0)),   // forward, strafe, turn, robot-centric
+        waitMs(2000),
+        instant(() -> {
+            follower.stop();
+            Pose p = follower.pose();
+            // The robot is against a known wall. Replace WALL_X and 270 with the real values.
+            // follower.setPose(poseFactory.of(WALL_X, p.y(), 270));
+        })
+    );
+}
+
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
             instant(() -> flywheel.setVelocity(1350)),   // spin up while driving
             follow(follower, path1()),
             shoot(),
-            instant(() -> intake.setPower(-1)), 
+            instant(() -> intake.setPower(1)), 
             follow(follower, path2()),
+            slamWall(),
             instant(() -> intake.setPower(0)), 
             follow(follower, path3()),
             shoot(),
