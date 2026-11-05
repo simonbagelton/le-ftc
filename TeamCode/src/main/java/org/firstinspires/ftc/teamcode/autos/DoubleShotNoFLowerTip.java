@@ -21,8 +21,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
-@Autonomous(name = "fancy pantaloons", group = "Autonomous")
-public class FancyAuto extends LinearOpMode {
+@Autonomous(name = "Double shot no flower tip", group = "Autonomous")
+public class DoubleShotNoFLowerTip extends LinearOpMode {
 
     private Follower follower;
 
