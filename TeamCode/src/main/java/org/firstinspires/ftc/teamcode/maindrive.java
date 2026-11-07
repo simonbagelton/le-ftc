@@ -131,7 +131,7 @@ public class maindrive extends OpMode {
 
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheel.setVelocityPIDFCoefficients(250, 3, 20, 0);
+        flywheel.setVelocityPIDFCoefficients(40, 0, 0, 12.5);
        
         flapservo = hardwareMap.get(CRServo.class, "flap");
        
@@ -251,6 +251,8 @@ public class maindrive extends OpMode {
            
            
         } 
+
+
         if (currentGamepad1.x && !previousGamepad1.x){
             if (slowmodetoggle == false){
                 slowmodetoggle = true;

@@ -45,10 +45,40 @@ public class DoubleShotNoFLowerTip extends LinearOpMode {
     private Command shoot() {
         return sequential(
             instant(() -> flapservo.setPower(-1)),
-            waitMs(6000),
-            instant(() -> flapservo.setPower(0))
+            waitMs(500),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(500),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(500)
         );
     }
+
 
 private Command slamWall() {
     return sequential(
@@ -88,7 +118,7 @@ private Command slamWall() {
 
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheel.setVelocityPIDFCoefficients(250, 3, 20, 0);
+        flywheel.setVelocityPIDFCoefficients(40, 0, 0, 12.5);
 
         flapservo = hardwareMap.get(CRServo.class, "flap");
 

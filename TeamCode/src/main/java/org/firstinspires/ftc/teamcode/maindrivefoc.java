@@ -53,6 +53,42 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 
+import com.pedropathing.api.Paths;
+
+import com.pedropathing.api.PoseFactory;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
+import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.Scheduler;
+import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.sequential;
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import static com.pedropathing.api.Paths.*;
+import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.sequential;
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+
+import com.pedropathing.api.Paths;
+import com.pedropathing.api.PoseFactory;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.Scheduler;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.teamcode.pedro.Constants;
+import com.pedropathing.drivetrain.DrivePowers;
+import com.pedropathing.follower.ManualDrive;
 /*
  * This file contains an example of an iterative (Non-Linear) "OpMode".
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
@@ -72,10 +108,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 public class maindrivefoc extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor fl = null;
-    private DcMotor fr = null;
-    private DcMotor bl = null;
-    private DcMotor br = null;
+
     private DcMotor intake = null;
     private CRServo intakeservo = null;
     private CRServo intakeservo2 = null;
@@ -92,7 +125,8 @@ public class maindrivefoc extends OpMode {
     private boolean shootertoggle = true;
     private boolean slowmodetoggle = false;
     private IMU imu = null;
-    
+    private double rotationoffset = 0;
+    private Follower follower;
     
     /*
      * Code to run ONCE when the driver hits INIT
@@ -101,6 +135,7 @@ public class maindrivefoc extends OpMode {
     public void init() {
         telemetry.addData("Status", "Initialized");
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "color");
+        follower = Constants.create(hardwareMap);
 
 
 
@@ -120,19 +155,7 @@ public class maindrivefoc extends OpMode {
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-        fl  = hardwareMap.get(DcMotor.class, "fl");
-        fr = hardwareMap.get(DcMotor.class, "fr");
-        bl  = hardwareMap.get(DcMotor.class, "bl");
-        br = hardwareMap.get(DcMotor.class, "br");
 
-
-
-
-        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         encoder = hardwareMap.get(DcMotorEx.class, "es");     
         encoderf = hardwareMap.get(DcMotorEx.class, "ef");  
         
@@ -149,7 +172,7 @@ public class maindrivefoc extends OpMode {
 
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheel.setVelocityPIDFCoefficients(250, 3, 20, 0);
+        flywheel.setVelocityPIDFCoefficients(40, 0, 0, 12.5);
        
         flapservo = hardwareMap.get(CRServo.class, "flap");
        
@@ -184,48 +207,24 @@ public class maindrivefoc extends OpMode {
     /*
      * Code to run REPEATEDLY after the driver hits START but before they hit STOP
      */
-    @Override
-    public void loop() {
-        YawPitchRollAngles robotAngles = imu.getRobotYawPitchRollAngles();
-        double zRotation = robotAngles.getYaw(AngleUnit.DEGREES); // Returns -180 to 180 degrees
+@Override
+public void loop() {
+    DrivePowers powers = ManualDrive.fieldCentric(
+            -gamepad1.left_stick_y,
+            -gamepad1.left_stick_x,
+            -gamepad1.right_stick_x,
+            follower.pose().heading()
+    );
+    follower.manual(powers);
 
-        
-        previousGamepad1.copy(currentGamepad1);
-        currentGamepad1.copy(gamepad1);
-        
-        // Setup a variable for each drive wheel to save power level for telemetry
-
-
-
-        // Choose to drive using either Tank Mode, or POV Mode
-        // Comment out the method that's not used.  The default below is POV.
-
-        // POV Mode uses left stick to go forward, and right stick to turn.
-        // - This uses basic math to combine motions and is easier to drive straight.
-        double drive = 0.0;
-        double turn  =  0.0;
-        double sideways = 0.0;
-        if (!slowmodetoggle) {
-        drive = gamepad1.left_stick_y;
-        turn  =  gamepad1.right_stick_x;
-        sideways = gamepad1.left_stick_x;
-        } else {
-        drive = gamepad1.left_stick_y * 0.2;
-        turn  =  gamepad1.right_stick_x * 0.2;
-        sideways = gamepad1.left_stick_x * 0.2;
-
-        }
-        drive = drive * Math.cos(Math.toRadians(zRotation));
-        sideways = sideways * Math.sin(Math.toRadians(zRotation));
+    // relocalise button
+    if (gamepad1.y) {
+        Pose cornerPose = new Pose(10.5, 10.5, Math.toRadians(90));
+        // On the fly Pose creation, we dont recommend this for Autonomous. Only accepts radians for heading
+        follower.setPose(cornerPose); // overrides our pose  
+    }
 
 
-        double devisor = Math.max(Math.abs(drive) + Math.abs(turn) + Math.abs(sideways), 1);
-        fl.setPower((drive + -turn + -sideways) / devisor);
-        fr.setPower((-drive + -turn + -sideways) / devisor);
-        bl.setPower((drive + -turn + sideways) / devisor);
-        br.setPower((-drive + -turn + sideways) / devisor);
-       
-       
         if (gamepad1.left_trigger > 0.5){
             intake.setPower(1);
             intakeservo.setPower(-1.0);
@@ -243,7 +242,7 @@ public class maindrivefoc extends OpMode {
        
         if (gamepad1.right_trigger > 0.5){
             if (shootertoggle == true){
-            flapservo.setPower(-1);
+            flapservo.setPower(-0.3);
            } else {
             flapservo.setPower(0);
            }
@@ -275,6 +274,8 @@ public class maindrivefoc extends OpMode {
            
            
         } 
+
+
         if (currentGamepad1.x && !previousGamepad1.x){
             if (slowmodetoggle == false){
                 slowmodetoggle = true;
@@ -328,21 +329,18 @@ public class maindrivefoc extends OpMode {
             flywheelspeed -= 5.0;
         }
 
-        // Show the elapsed game time and wheel power.
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
-        NormalizedRGBA colors = colorSensor.getNormalizedColors();
-        telemetry.addData("Red", colors.red);
-        telemetry.addData("Green", colors.green);
-        telemetry.addData("Blue", colors.blue);
-        telemetry.addData("Alpha (Proximity/Light)", colors.alpha);
-        telemetry.addData("Current Velocity", flywheel.getVelocity());
-        telemetry.addData("target velocity", flywheelspeed);
-        telemetry.addData("encocer pos: ", encoder.getCurrentPosition());
-        telemetry.addData("encoderf pos: ", encoderf.getCurrentPosition());
-        telemetry.update();
 
-    }
 
+
+
+
+    follower.update();
+    Pose robotPose = follower.pose(); // returns a Pose object
+    telemetry.addData("Robot X", robotPose.x());
+    telemetry.addData("Robot Y", robotPose.y());
+    telemetry.addData("Robot Heading", Math.toDegrees(robotPose.heading())); 
+    // Math.toDegrees() is a built-in java method
+}
     /*
      * Code to run ONCE after the driver hits STOP
      */

@@ -36,7 +36,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
-@Autonomous(name = "AutoPath", group = "Autonomous")
+@Autonomous(name = "Auto after tip", group = "Autonomous")
 public class AutoAfterTip extends LinearOpMode {
 
     private Follower follower;
@@ -55,6 +55,7 @@ public class AutoAfterTip extends LinearOpMode {
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
+            waitMs(15000),
             instant(() -> flywheel.setVelocity(1350)),
             follow(follower, path1()),
             shoot(),
@@ -77,7 +78,7 @@ public class AutoAfterTip extends LinearOpMode {
         follower.update();
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheel.setVelocityPIDFCoefficients(250, 3, 20, 0);
+        flywheel.setVelocityPIDFCoefficients(40, 0, 0, 12.5);
 
         flapservo = hardwareMap.get(CRServo.class, "flap");
 

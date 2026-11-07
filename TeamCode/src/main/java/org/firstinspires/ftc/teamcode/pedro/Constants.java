@@ -67,7 +67,7 @@ public static TwoWheelConfig localizerConfig = new TwoWheelConfig(c -> {
     c.yPodName.set("es");
     c.imuName.set("imu");
     c.xPodOffset.set(4.281680841386278);
-    c.yPodOffset.set(-0.1413239808188638);
+    c.yPodOffset.set(-1.7513239808188638);
     c.forwardTicksToInches.set(0.00155);
     c.strafeTicksToInches.set(0.00155);
     c.xPodDirection.set(Encoder.FORWARD);
