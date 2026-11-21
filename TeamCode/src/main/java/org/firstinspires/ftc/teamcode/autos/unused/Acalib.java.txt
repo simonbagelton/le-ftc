@@ -1,3 +1,5 @@
+
+
 package org.firstinspires.ftc.teamcode;
 
 import static com.pedropathing.api.Paths.*;
@@ -16,21 +18,20 @@ import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
-
-@Autonomous(name = "calib", group = "Autonomous")
-public class Calib extends LinearOpMode {
+@Autonomous(name = "acalib", group = "Autonomous")
+public class Acalib extends LinearOpMode {
 
     private Follower follower;
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(8.75, 121.75, 90);
-    private final Pose calibration = poseFactory.of(132.75, 120.75, 180);
+    private final Pose start = poseFactory.of(94.75, 34.75, 90);
+    private final Pose point11 = poseFactory.of(46.75, 34.75, 270);
 
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
-            follow(follower, calibration())
+            follow(follower, path11())
         );
     }
 
@@ -61,7 +62,7 @@ public class Calib extends LinearOpMode {
         }
     }
 
-    public Path calibration() {
-        return Paths.line(start, calibration).constant(calibration);
+    public Path path11() {
+        return Paths.line(start, point11).constant(point11);
     }
 }

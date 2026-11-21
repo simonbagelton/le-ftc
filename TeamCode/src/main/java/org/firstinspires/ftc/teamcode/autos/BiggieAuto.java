@@ -1,0 +1,204 @@
+
+package org.firstinspires.ftc.teamcode;
+
+import static com.pedropathing.api.Paths.*;
+import com.pedropathing.api.Paths;
+
+import com.pedropathing.api.PoseFactory;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
+import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.Scheduler;
+import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.sequential;
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import org.firstinspires.ftc.teamcode.pedro.Constants;
+import static com.pedropathing.api.Paths.*;
+import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.sequential;
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+
+import com.pedropathing.api.Paths;
+import com.pedropathing.api.PoseFactory;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.Scheduler;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+@Autonomous(name = "Biggie auto", group = "Autonomous")
+public class BiggieAuto extends LinearOpMode {
+
+    private Follower follower;
+
+    private final PoseFactory poseFactory = PoseFactory.degrees();
+
+    private final Pose start = poseFactory.of(55.3538, 9.8068, 270);
+    private final Pose point11 = poseFactory.of(11.0836, 12.3711, 260);
+    private final Pose point11Control1 = poseFactory.of(12.9528, 36.6538, 0);
+    private final Pose point2 = poseFactory.of(55.8521, 8.922, 270);
+    private final Pose point2Control1 = poseFactory.of(33.8261, 31.3079, 0);
+    private final Pose point3 = poseFactory.of(12.0974, 95.6294, 270);
+    private final Pose point3Control1 = poseFactory.of(23.895, 24.9206, 0);
+
+
+
+
+
+
+
+        private CRServo flapservo = null;
+    private DcMotorEx flywheel = null;
+    private DcMotor intake = null;
+
+    // Fires: run the flap for 4 seconds, then stop it
+    private Command shoot() {
+        return sequential(
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),            
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300)
+
+        );
+    }
+
+
+    private Command slamWall() {
+    return sequential(
+        instant(() -> follower.manual(0.5, 0, 0)),   // forward, strafe, turn, robot-centric
+        waitMs(2000),
+        instant(() -> {
+            follower.stop();
+            Pose p = follower.pose();
+            // The robot is against a known wall. Replace WALL_X and 270 with the real values.
+            // follower.setPose(poseFactory.of(WALL_X, p.y(), 270));
+        })
+    );
+    }
+    // Autonomous routine
+    public Command autoRoutine() {
+        return sequential(
+            instant(() -> flywheel.setVelocity(Constants.target_flywheel_speed)),
+            waitMs(2000),
+            shoot(),
+            instant(() -> intake.setPower(1)),
+            follow(follower, path11()),
+            slamWall(),
+            instant(() -> intake.setPower(0)),
+            follow(follower, path2()),
+            shoot(),
+            follow(follower, path3())
+        );
+    }
+
+    @Override
+    public void runOpMode() {
+        Scheduler.reset();
+        follower = Constants.create(hardwareMap);
+        follower.setPose(start);
+        follower.update();
+        
+        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheel.setVelocityPIDFCoefficients(40, 0, 0, 12.5);
+
+        flapservo = hardwareMap.get(CRServo.class, "flap");
+
+        intake = hardwareMap.get(DcMotor.class, "intake");
+
+
+
+        waitForStart();
+        schedule(autoRoutine());
+
+        while (opModeIsActive()) {
+            follower.update();
+            Scheduler.execute();
+
+            telemetry.addData("x", follower.pose().x());
+            telemetry.addData("y", follower.pose().y());
+            telemetry.addData("heading", follower.pose().heading());
+
+            if (follower.currentPath() != null) {
+                telemetry.addData("Current path distance remaining", follower.distanceToEndpoint());
+                telemetry.addData("Path number", follower.pathIndex());
+            }
+
+            telemetry.update();
+        }
+    }
+
+    public Path path11() {
+        return Paths.curve(start, point11Control1, point11).linear(start, point11);
+    }
+
+    public Path path2() {
+        return Paths.curve(point11, point2Control1, point2).constant(point2);
+    }
+
+    public Path path3() {
+        return Paths.curve(point2, point3Control1, point3).constant(point3);
+    }
+} 

@@ -48,7 +48,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Gamepad;
-
+import org.firstinspires.ftc.teamcode.pedro.Constants;
 /*
  * This file contains an example of an iterative (Non-Linear) "OpMode".
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
@@ -82,11 +82,13 @@ public class maindrive extends OpMode {
     private DcMotorEx encoder = null;
     private DcMotorEx encoderf = null;
     private NormalizedColorSensor colorSensor;
-    public double flywheelspeed = 1350;
+    public double flywheelspeed = Constants.target_flywheel_speed;
     private Gamepad previousGamepad1 = new Gamepad();
     private Gamepad currentGamepad1 = new Gamepad();
     private boolean shootertoggle = true;
     private boolean slowmodetoggle = false;
+    private boolean colorafter = false;
+    
 
     
     
@@ -171,7 +173,7 @@ public class maindrive extends OpMode {
         
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
-        
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
         // Setup a variable for each drive wheel to save power level for telemetry
 
 
@@ -220,18 +222,44 @@ public class maindrive extends OpMode {
         if (gamepad1.right_trigger > 0.5){
             if (shootertoggle == true){
             flapservo.setPower(-1);
-           } else {
-            flapservo.setPower(0);
-           }
-           
-        } else {
-
-            flapservo.setPower(0);
-           
         }
+    
+    }  else {
+            flapservo.setPower(0);
+
+
+        }
+
+
+
+
        
+
+
+       if (!previousGamepad1.right_stick_button && currentGamepad1.right_stick_button){
+        colorafter = true;
+            if (colors.red > Constants.colortrigger){
+                flapservo.setPower(0);
+            } else {
+                flapservo.setPower(-1);
+            }
+
+     }
+
+     if (colorafter == true){
+                    if (colors.red > Constants.colortrigger){
+                flapservo.setPower(0);
+                colorafter = false;
+            } else {
+                flapservo.setPower(-1);
+            }
+
+     }
        
-       
+
+
+
+
        
        if (shootertoggle == true){
         flywheel.setVelocity(flywheelspeed);
@@ -290,6 +318,7 @@ public class maindrive extends OpMode {
             intake.setPower(-1);
             intakeservo.setPower(1.0);
             intakeservo2.setPower(1);
+            flapservo.setPower(-1);
 
         } else if (shootertoggle == false){
             flywheel.setVelocity(0);
@@ -308,7 +337,7 @@ public class maindrive extends OpMode {
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-        NormalizedRGBA colors = colorSensor.getNormalizedColors();
+        
         telemetry.addData("Red", colors.red);
         telemetry.addData("Green", colors.green);
         telemetry.addData("Blue", colors.blue);

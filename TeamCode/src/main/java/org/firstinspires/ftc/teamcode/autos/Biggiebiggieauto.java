@@ -1,6 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
 import static com.pedropathing.api.Paths.*;
+import com.pedropathing.api.Paths;
+
+import com.pedropathing.api.PoseFactory;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
+import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.Scheduler;
+import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.sequential;
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import static com.pedropathing.api.Paths.*;
 import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.commands.Commands.*;
 import static com.pedropathing.ivy.groups.Groups.sequential;
@@ -20,24 +35,28 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
-
-@Autonomous(name = "Double shot no flower tip", group = "Autonomous")
-public class DoubleShotNoFLowerTip extends LinearOpMode {
+@Autonomous(name = "Biggie biggie auto", group = "Autonomous")
+public class Biggiebiggieauto extends LinearOpMode {
 
     private Follower follower;
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(54.8344, 8.2331, 270);
-    private final Pose path1 = poseFactory.of(56.4662, 15.9522, 270);
-    private final Pose point2 = poseFactory.of(9.7894, 9.6047, 270);
-    private final Pose point2Control1 = poseFactory.of(10.136, 46.9353, 0);
-    private final Pose point3 = poseFactory.of(56.8054, 15.1503, 270);
-    private final Pose point4Start = poseFactory.of(56.8054, 15.1503, 270);
-    private final Pose point4 = poseFactory.of(12.4991, 96.6831, 270);
-    private final Pose point4Control1 = poseFactory.of(10.5284, 37.5896, 0);
 
-    private CRServo flapservo = null;
+    private final Pose start = poseFactory.of(55.1207, 8.8744, 270);
+    private final Pose point11 = poseFactory.of(11.0836, 12.3711, 260);
+    private final Pose point11Control1 = poseFactory.of(12.9528, 36.6538, 0);
+    private final Pose point2Start = poseFactory.of(11.0836, 12.3711, 270);
+    private final Pose point2 = poseFactory.of(60.1188, 132.6945, 90);
+    private final Pose point2Control1 = poseFactory.of(34.2677, 59.8877, 0);
+    private final Pose point2Control2 = poseFactory.of(13.8701, 134.64, 0);
+    private final Pose point2Control3 = poseFactory.of(66.5675, 106.839, 0);
+    private final Pose point3 = poseFactory.of(11.8051, 117.9161, 90);
+    private final Pose point3Control1 = poseFactory.of(65.8544, 101.8274, 0);
+
+
+
+        private CRServo flapservo = null;
     private DcMotorEx flywheel = null;
     private DcMotor intake = null;
 
@@ -45,42 +64,67 @@ public class DoubleShotNoFLowerTip extends LinearOpMode {
     private Command shoot() {
         return sequential(
             instant(() -> flapservo.setPower(-1)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(0)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(-1)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(0)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(-1)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(0)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(-1)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(0)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(-1)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(0)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(-1)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(0)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(-1)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(0)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(-1)),
-            waitMs(500),
+            waitMs(300),
             instant(() -> flapservo.setPower(0)),
-            waitMs(500)
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),            
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(-1)),
+            waitMs(300),
+            instant(() -> flapservo.setPower(0)),
+            waitMs(300)
+
         );
     }
 
 
-private Command slamWall() {
+    private Command slamWall() {
     return sequential(
         instant(() -> follower.manual(0.3, 0, 0)),   // forward, strafe, turn, robot-centric
         waitMs(2000),
@@ -91,21 +135,22 @@ private Command slamWall() {
             // follower.setPose(poseFactory.of(WALL_X, p.y(), 270));
         })
     );
-}
+    }
+
+
 
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
-            instant(() -> flywheel.setVelocity(1350)),   // spin up while driving
-            follow(follower, path1()),
+            instant(() -> flywheel.setVelocity(Constants.target_flywheel_speed)),
             shoot(),
-            instant(() -> intake.setPower(1)), 
-            follow(follower, path2()),
+            follow(follower, path11()),
+            instant(() -> intake.setPower(1)),
             slamWall(),
-            instant(() -> intake.setPower(0)), 
-            follow(follower, path3()),
+            follow(follower, path2()),
             shoot(),
-            follow(follower, path4())
+            follow(follower, path3())
+
         );
     }
 
@@ -123,6 +168,8 @@ private Command slamWall() {
         flapservo = hardwareMap.get(CRServo.class, "flap");
 
         intake = hardwareMap.get(DcMotor.class, "intake");
+
+
 
         waitForStart();
         schedule(autoRoutine());
@@ -144,19 +191,16 @@ private Command slamWall() {
         }
     }
 
-    public Path path1() {
-        return Paths.line(start, path1).constant(path1);
+    public Path path11() {
+        return Paths.curve(start, point11Control1, point11).linear(start, point11);
     }
 
     public Path path2() {
-        return Paths.curve(path1, point2Control1, point2).constant(point2);
+        return Paths.curve(point2Start, point2Control1, point2Control2, point2Control3, point2).linear(point2Start, point2);
     }
 
     public Path path3() {
-        return Paths.line(point2, point3).constant(point3);
-    }
-
-    public Path path4() {
-        return Paths.curve(point4Start, point4Control1, point4).linear(point4Start, point4);
+        return Paths.curve(point2, point3Control1, point3).constant(point3);
     }
 }
+

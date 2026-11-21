@@ -66,10 +66,10 @@ public static TwoWheelConfig localizerConfig = new TwoWheelConfig(c -> {
     c.xPodName.set("ef");
     c.yPodName.set("es");
     c.imuName.set("imu");
-    c.xPodOffset.set(4.281680841386278);
-    c.yPodOffset.set(-1.7513239808188638);
-    c.forwardTicksToInches.set(0.00155);
-    c.strafeTicksToInches.set(0.00155);
+    c.xPodOffset.set(2.0);
+    c.yPodOffset.set(-4.0);
+    c.forwardTicksToInches.set(0.0015);
+    c.strafeTicksToInches.set(0.0015);
     c.xPodDirection.set(Encoder.FORWARD);
     c.yPodDirection.set(Encoder.REVERSE);
     c.imu.set(new RevHubIMU(new RevHubOrientationOnRobot(
@@ -98,7 +98,7 @@ public static ForesightConfig foresightConfig = new ForesightConfig(c -> {
     c.coast.set(Controller.proportionalFeedforward(0.0145));
     c.brake.set(Controller.proportionalFeedforward(0.0115));
 
-    c.headingFeedback.set(Controller.proportional(1.5));
+    c.headingFeedback.set(Controller.proportional(1));
     c.headingBrakeCoefficients.set(Vector2D.cartesian(0.155, 0.0175));
 
     c.linearBrakeCoefficients.set(Matrix.diag(0.0165, 0.039));
@@ -110,5 +110,9 @@ public static ForesightConfig foresightConfig = new ForesightConfig(c -> {
     c.naturalForwardDeceleration.set(75.0);
     c.naturalStrafeDeceleration.set(175.0);
 });
+
+
+public final static int target_flywheel_speed = 1190;
+public final static double colortrigger = 0.06;
 
 }
